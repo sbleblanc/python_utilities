@@ -5,9 +5,10 @@ import numpy as np
 class PowersetBuilder(object):
     """ Iterator building the powerset from a probability vector. Will obtain the next most likely set in linear time."""
 
-    def __init__(self, x, log_prob=False):
+    def __init__(self, x, root_size=1, log_prob=False):
         """
         :param x: Probability vector
+        :param root_size: Length of the root set
         :param log_prob: Whether "x" is the log-probabilities
         """
         self.log_prob = log_prob
@@ -20,11 +21,12 @@ class PowersetBuilder(object):
         self.sorted_elements_indices = {se: i for i, se in enumerate(self.sorted_elements)}
 
         for i in range(len(self.sorted_elements)):
-            self.most_probable_elements.add(frozenset(self.sorted_elements[:i+1]))
+            most_probable_set = frozenset(self.sorted_elements[:i+1])
+            self.most_probable_elements.add(most_probable_set)
+            if i + 1 == root_size:
+                root_set = most_probable_set
 
-        root_element = self.sorted_elements[0]
-        root_set = frozenset([root_element])
-        h.heappush(self.current_pool, (self.x[root_element], root_set))
+        h.heappush(self.current_pool, (-self.__get_element_prob(root_set), root_set))
         self.pool_set_cache.add(root_set)
 
     def __len__(self):
@@ -61,14 +63,21 @@ class PowersetBuilder(object):
         self.pool_set_cache.remove(next_element_s)
         return -next_element_p, next_element_s
 
+    def __get_element_prob(self, element):
+        if self.log_prob:
+            return np.array([-(self.x[se]) for se in element]).sum()
+        else:
+            return np.array([-(self.x[se]) for se in element]).prod()
+
     def __add_new_element(self, new_element):
         """ Will add the new element set to the pool(and cache) with the appropriate probability
         :param new_element:The new set of elements to add to the pool
         """
-        if self.log_prob:
-            prob = np.array([-(self.x[se]) for se in new_element]).sum()
-        else:
-            prob = np.array([-(self.x[se]) for se in new_element]).prod()
+        # if self.log_prob:
+        #     prob = np.array([-(self.x[se]) for se in new_element]).sum()
+        # else:
+        #     prob = np.array([-(self.x[se]) for se in new_element]).prod()
+        prob = self.__get_element_prob(new_element)
         new_element = frozenset(new_element)
         h.heappush(self.current_pool, (-prob, new_element))
         self.pool_set_cache.add(new_element)
