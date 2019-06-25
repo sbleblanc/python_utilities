@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='python_utilities',
     version='1.0',
-    packages=['stats', 'utils'],
+    packages=['stats', 'utils', 'parsers'],
     url='',
     license='',
     author='Samuel Beland-Leblanc',
