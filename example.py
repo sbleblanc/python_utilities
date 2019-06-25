@@ -1,5 +1,5 @@
 import numpy as np
-from stats import PowersetBuilder
+from python_utilities.stats import PowersetBuilder
 
 x = np.array([0.04, 0.16, 0.5, 0.3])
 pb = PowersetBuilder(x, root_size=3)
