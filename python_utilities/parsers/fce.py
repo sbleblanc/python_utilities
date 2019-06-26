@@ -1,5 +1,6 @@
 from lxml import etree
 from os import walk, path
+from python_utilities.utils.utils_fn import print_progress_bar
 
 
 def extract_original_text(file):
@@ -13,14 +14,25 @@ def extract_original_text(file):
             s.append(p.text)
         #Errors are in <NS> nodes
         for ns in p:
-            #if the correction is a replacement or a deletion, the first child is a <i> node with the erronuous text
-            if ns[0].tag == 'i':
-                if ns[0].text:
-                    s.append(ns[0].text)
-                else:
-                    print('nested?')
-            #Need to append the tail since <NS> tags are inline
-            s.append(ns.tail)
+            #Some NS tags are nested, we grab the deepest
+            nested_ns = ns.findall('.//NS')
+            if len(nested_ns) > 0:
+                correction_node = nested_ns[-1]
+            else:
+                correction_node = ns
+            # if the correction is a replacement or a deletion, the first child is a <i> node with the erronuous text
+            if len(correction_node) == 0:
+                if correction_node.text:
+                    s.append(correction_node.text)
+            else:
+                if correction_node[0].tag == 'i':
+                    if correction_node[0].text:
+                        s.append(correction_node[0].text)
+                    else:
+                        print('nested : {}'.format(file))
+            #Need to append the tail (if present) since <NS> tags are inline
+            if ns.tail:
+                s.append(ns.tail)
         sentences.append(''.join(s))
     return '\n'.join(sentences)
 
@@ -32,7 +44,8 @@ def extract_original_text_to_file(output_fn, dataset_folder, recursive=True):
         if not recursive:
             break
     with open(output_fn, 'w') as out_file:
-        for f in files:
+        for i, f in enumerate(files):
+            print_progress_bar(i + 1, len(files), f)
             out_file.write(extract_original_text(f))
 
 
