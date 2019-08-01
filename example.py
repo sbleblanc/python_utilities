@@ -1,17 +1,12 @@
-import numpy as np
-from python_utilities.stats import PowersetBuilder
-from python_utilities.parsers.fce import extract_original_text_to_file, extract_original_text
+import python_utilities.data.preprocess as pp
 
-# extract_original_text('/home/user1/Documents/Research/Corpus/FCE/fce-released-dataset/dataset/0102_2000_6/doc883.xml')
-extract_original_text_to_file('fce_original.txt', '/home/user1/Documents/Research/Corpus/FCE/fce-released-dataset/dataset')
+# dup_pairs = pp.detect_dup_docs('/home/samuel/Documents/Corpus/BookCorpus/BC Processed')
+# with open('temp/dup_results.txt', 'w') as out_file:
+#     for r, c in dup_pairs:
+#         out_file.write('{}: {}\n'.format(r, c))
 
-
-# x = np.array([0.04, 0.16, 0.5, 0.3])
-# pb = PowersetBuilder(x, root_size=3)
-# for prob, s in pb:
-#     print('{}: {}'.format(prob, s))
-#
-# x = np.log(x)
-# pb = PowersetBuilder(x, root_size=3, log_prob=True)
-# for prob, s in pb:
-#     print('{}: {}'.format(prob, s))
+_, _, lc = pp.replace_by_unk('temp/BookCorpus_historical_partial_bod.txt', 'temp/bc_historical_partial_bod_unk_num.txt', 'temp/stats_bc_historical_partial.txt', 10000, unk_thresh=0.99)
+# _, _, lc = pp.replace_by_unk('temp/bc_historical_combined.txt', 'temp/bc_historical_combined_unk_num.txt', 'temp/bc_historical_combined_stats.txt', 10000, unk_thresh=0.99)
+print(lc)
+# lc = pp.adjust_corpus_to_characters('temp/BookCorpus_unique.txt', 'temp/BookCorpus_unique_char_256.txt')
+# print('{} lines'.format(lc))
