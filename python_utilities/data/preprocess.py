@@ -145,3 +145,19 @@ def adjust_corpus_to_characters(input_fn, output_fn, max_len=256, space_token='<
                     out_file.write('{}\n'.format(' '.join(final_str[:-1])))
                     line_counter += 1
     return line_counter
+
+
+def get_corpus_stats(corpus_fn):
+    words_total = 0
+    sentences_total = 0
+    unique_words = set()
+    with open(corpus_fn, 'r') as in_file:
+        for line in in_file:
+            stripped_line = line.strip()
+            if stripped_line == '<BOD>':
+                continue
+            sentences_total += 1
+            words = stripped_line.split(' ')
+            words_total += len(words)
+            unique_words.update(words)
+    return words_total, len(unique_words), sentences_total
